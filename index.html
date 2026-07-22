@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playbook de Prospecção · Simon.AI Demand Prediction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#17203C; --navy-2:#232F55; --ink:#2A2F3E; --blue:#2E4B8F; --sky:#5B7FD4;
+  --paper:#F7F8FB; --card:#FFFFFF; --line:#DEE1EC; --mut:#5E6175;
+  --ok:#1E7B4F; --warn:#B4540A; --chip:#EDF0F8;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);font-size:15.5px;line-height:1.6}
+.layout{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+
+/* ---------- sidebar (nod ao chat do Simon.AI) ---------- */
+aside{background:var(--navy);color:#C9D1E6;position:sticky;top:0;height:100vh;padding:26px 18px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.brand .dot{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--blue));display:grid;place-items:center;font-family:'Archivo';font-weight:800;color:#fff}
+.brand b{font-family:'Archivo';font-weight:700;color:#fff;font-size:16px;letter-spacing:.2px}
+.brand span{display:block;font-size:11px;color:#8D99BE;letter-spacing:.6px;text-transform:uppercase}
+aside .tag{font-size:11px;color:#8D99BE;margin:14px 6px 8px;text-transform:uppercase;letter-spacing:.8px}
+aside a{display:block;color:#C9D1E6;text-decoration:none;padding:9px 12px;border-radius:9px;font-size:13.5px;border-left:3px solid transparent}
+aside a:hover{background:var(--navy-2);color:#fff}
+aside a.active{background:var(--navy-2);color:#fff;border-left-color:var(--sky)}
+aside .foot{margin-top:auto;font-size:11px;color:#6C7799;padding:10px 6px;border-top:1px solid #2A3559}
+
+/* ---------- main ---------- */
+main{padding:44px 56px 90px;max-width:1000px}
+.eyebrow{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--blue);font-weight:600}
+h1{font-family:'Archivo';font-weight:800;font-size:clamp(30px,4vw,42px);color:var(--navy);line-height:1.08;margin:8px 0 10px}
+.lede{color:var(--mut);max-width:640px;margin-bottom:8px}
+.meta{font-size:12.5px;color:var(--mut);border-bottom:2px solid var(--navy);padding-bottom:18px;margin-bottom:8px}
+section{margin-top:52px;scroll-margin-top:24px}
+h2{font-family:'Archivo';font-weight:700;font-size:23px;color:var(--navy);margin-bottom:6px;display:flex;align-items:baseline;gap:10px}
+h2 .k{font-family:'IBM Plex Mono';font-size:13px;color:var(--sky)}
+.sub{color:var(--mut);margin-bottom:18px;max-width:680px}
+h3{font-family:'Archivo';font-weight:700;font-size:15px;color:var(--blue);margin:22px 0 10px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(23,32,60,.07);font-size:14px}
+th{background:var(--navy);color:#fff;text-align:left;padding:11px 14px;font-weight:600;font-size:13px}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#FAFBFD}
+td b{color:var(--navy)}
+
+/* segment filter (ICP) */
+.pills{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 16px;font-size:13.5px;cursor:pointer;color:var(--mut);font-family:inherit}
+.pill.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.hide{display:none!important}
+.callout{background:#FFF6EC;border:1px solid #F2D9BC;border-left:4px solid var(--warn);border-radius:10px;padding:13px 16px;font-size:14px;margin-top:14px}
+.callout.blue{background:#EEF3FF;border-color:#CCD9F5;border-left-color:var(--blue)}
+.callout b{color:var(--navy)}
+
+/* chat-style scripts — assinatura visual (eco da UI do Simon.AI) */
+.chat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 16px;margin:14px 0;box-shadow:0 1px 3px rgba(23,32,60,.06)}
+.chat .who{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chat .who b{font-family:'Archivo';font-size:13.5px;color:var(--navy)}
+.chat .who .ch{font-size:11.5px;background:var(--chip);color:var(--blue);border-radius:6px;padding:3px 9px;font-family:'IBM Plex Mono')}
+.bubble{background:#F2F4FA;border-radius:4px 16px 16px 16px;padding:14px 16px;font-size:14.3px;white-space:pre-wrap;line-height:1.65}
+.bubble .ph{background:#FDEFC8;border-radius:4px;padding:0 3px;font-family:'IBM Plex Mono';font-size:12.8px;color:#7A5A00}
+.copy{margin-top:10px;display:inline-flex;align-items:center;gap:7px;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 15px;font-size:13px;cursor:pointer;font-family:inherit}
+.copy:hover{background:var(--blue)}
+.copy.done{background:var(--ok)}
+
+/* cadence */
+.cad{display:flex;flex-direction:column;gap:0;margin-top:6px}
+.step{display:grid;grid-template-columns:64px 22px 1fr;gap:14px;align-items:start;position:relative;padding:12px 0}
+.step .d{font-family:'IBM Plex Mono';font-weight:500;color:var(--blue);font-size:13.5px;padding-top:2px}
+.step .n{width:20px;height:20px;border-radius:50%;border:2px solid var(--blue);background:var(--card);margin-top:2px;cursor:pointer;flex-shrink:0;position:relative;z-index:1}
+.step .n.ck{background:var(--ok);border-color:var(--ok)}
+.step .n.ck::after{content:"✓";color:#fff;font-size:12px;position:absolute;inset:0;display:grid;place-items:center}
+.step:not(:last-child)::before{content:"";position:absolute;left:73px;top:34px;bottom:-14px;width:2px;background:var(--line)}
+.step .t b{color:var(--navy)}
+.step .t span{display:block;color:var(--mut);font-size:14px}
+.step.ck .t{opacity:.45;text-decoration:line-through}
+.reset{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 13px;font-size:12.5px;color:var(--mut);cursor:pointer;margin-top:8px;font-family:inherit}
+
+/* accordions */
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+summary{cursor:pointer;padding:14px 18px;font-weight:600;color:var(--navy);list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:14.5px}
+summary::after{content:"+";font-family:'Archivo';font-size:19px;color:var(--sky);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details .body{padding:0 18px 16px;color:var(--ink);font-size:14.3px;border-top:1px dashed var(--line);padding-top:12px}
+
+/* discovery */
+.qs{counter-reset:q;display:flex;flex-direction:column;gap:9px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 16px 12px 52px;position:relative;font-size:14.5px}
+.q::before{counter-increment:q;content:counter(q,decimal-leading-zero);position:absolute;left:15px;top:12px;font-family:'IBM Plex Mono';color:var(--sky);font-size:13px}
+
+.cta2{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.cta2 .c{flex:1;min-width:240px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.cta2 .c b{font-family:'Archivo';color:var(--navy);display:block;margin-bottom:5px}
+.cta2 .c:first-child{border-top:4px solid var(--blue)}
+.cta2 .c:last-child{border-top:4px solid var(--sky)}
+
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr}
+  aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:16px}
+  aside .tag,aside .foot{display:none}
+  aside a{padding:7px 11px;border-left:none;border-radius:99px;font-size:12.5px}
+  main{padding:30px 20px 70px}
+  .step{grid-template-columns:48px 22px 1fr}
+  .step:not(:last-child)::before{left:57px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.pill:focus-visible,.copy:focus-visible,.n:focus-visible,summary:focus-visible,aside a:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="dot">S</div><div><b>simon.ai</b><span>Playbook de prospecção</span></div></div>
+  <div class="tag">Navegação</div>
+  <a href="#icp">1 · Quem prospectar</a>
+  <a href="#pitch">2 · Elevator pitch</a>
+  <a href="#valor">3 · Valor por interlocutor</a>
+  <a href="#cadencia">4 · Cadência 10 dias</a>
+  <a href="#scripts">5 · Scripts prontos</a>
+  <a href="#discovery">6 · Discovery</a>
+  <a href="#objecoes">7 · Objeções</a>
+  <a href="#cta">8 · CTA padrão</a>
+  <a href="https://hupdataconsultoria-my.sharepoint.com/:w:/g/personal/marcus_hupdata_com/IQCjC4RnUVqdT4Bf76z8rQgVAS6_WD78QSUC9pm7SC3BusU?e=u4zwYI" target="_blank" rel="noopener noreferrer">9 · Sales Document ↗</a>
+  <div class="foot">Simon.AI Demand Prediction · HupData · Julho/2026 · Uso interno</div>
+</aside>
+
+<main>
+  <div class="eyebrow">Playbook de prospecção</div>
+  <h1>Simon.AI Demand Prediction</h1>
+  <p class="lede">Pitch, cadência e scripts para prospecção B2B — Indústria, Varejo, Distribuição e Atacado. Clique nos scripts para copiar; marque as etapas da cadência conforme executa.</p>
+  <p class="meta">Simon.AI Demand Prediction · HupData · Julho/2026 · Uso interno</p>
+
+  <section id="icp">
+    <h2><span class="k">01</span>Quem prospectar (ICP)</h2>
+    <p class="sub">O Simon.AI resolve um problema de <b>planejamento de demanda</b>. Prospecte apenas empresas e cargos com correlação direta com essa dor — critério estrito de relevância entre cargo e oferta.</p>
+    <div class="pills" role="tablist">
+      <button class="pill on" data-seg="all">Todos</button>
+      <button class="pill" data-seg="ind">Indústria</button>
+      <button class="pill" data-seg="var">Varejo</button>
+      <button class="pill" data-seg="dis">Distribuição e Atacado</button>
+    </div>
+    <table>
+      <thead><tr><th style="width:20%">Segmento</th><th style="width:45%">Perfil de empresa</th><th>Cargos-alvo</th></tr></thead>
+      <tbody>
+        <tr data-seg="ind"><td><b>Indústria</b></td><td>Muitos SKUs e cadeia complexa: metal-mecânica, autopeças, eletroeletrônicos, bens duráveis, alimentos, bebidas, químicos, farmacêuticos</td><td>Diretor/Gerente de PCP, Supply Chain, Compras/Procurement, FP&amp;A</td></tr>
+        <tr data-seg="var"><td><b>Varejo</b></td><td>Supermercados, farmácias, lojas de departamento, home centers, redes omnichannel</td><td>Diretor/Gerente de Compras, Category Management, Operações, Pricing, Marketing/CRM</td></tr>
+        <tr data-seg="dis"><td><b>Distribuição e Atacado</b></td><td>Distribuidoras e atacadistas com milhares de clientes, múltiplas rotas e CDs</td><td>Diretor Comercial, Compras, Logística, Finanças</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Fora do ICP:</b> empresas sem operação de estoque/produção relevante e profissionais sem relação com planejamento de demanda (jurídico, RH etc.). Não incluir na lista.</div>
+  </section>
+
+  <section id="pitch">
+    <h2><span class="k">02</span>Elevator pitch (30 segundos)</h2>
+    <div class="chat">
+      <div class="who"><b>Pitch de abertura</b><span class="ch">verbal · 30s</span></div>
+      <div class="bubble" id="ep">“A HupData desenvolveu o Simon.AI, um motor de previsão de demanda com IA. Ele combina o seu histórico de vendas e pedidos com variáveis externas — inflação, juros, câmbio, clima, calendário e movimentos da concorrência — e entrega previsões por produto, cliente, loja, rota e região. Na prática: menos ruptura, menos estoque parado e mais margem, com cenários acionáveis para PCP, compras, pricing e finanças. Tudo integrado via API ao seu ERP, CRM e BI — e com interface em linguagem natural, como conversar com um analista.”</div>
+      <button class="copy" data-copy="ep">Copiar pitch</button>
+    </div>
+  </section>
+
+  <section id="valor">
+    <h2><span class="k">03</span>Proposta de valor por interlocutor</h2>
+    <table>
+      <thead><tr><th style="width:19%">Interlocutor</th><th style="width:36%">Dor que ele sente</th><th>Mensagem-chave</th></tr></thead>
+      <tbody>
+        <tr><td><b>PCP / Produção</b></td><td>Lotes e turnos definidos no feeling; ociosidade e urgências</td><td>Dimensione lotes, turnos e capacidade com base na demanda futura, não na média do passado</td></tr>
+        <tr><td><b>Supply / Logística</b></td><td>Estoque mal distribuído entre fábricas, CDs e clientes</td><td>Estoques posicionados onde a demanda vai acontecer, com nível de serviço (OTIF) otimizado</td></tr>
+        <tr><td><b>Compras</b></td><td>Volumes imprevisíveis, contratos ruins, frete urgente caro</td><td>Previsibilidade de volumes para negociar contratos melhores e comprar o mix certo</td></tr>
+        <tr><td><b>Pricing / Promoções</b></td><td>Promoção vende volume mas destrói margem</td><td>Elasticidade de demanda e simulações de cenário antes de dar desconto</td></tr>
+        <tr><td><b>Finanças / FP&amp;A</b></td><td>Projeções de caixa descoladas da demanda real</td><td>Cenários macroeconômicos ligados diretamente à projeção de faturamento e capital de giro</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="cadencia">
+    <h2><span class="k">04</span>Cadência sugerida (10 dias)</h2>
+    <p class="sub">Marque cada toque conforme executa. O progresso vale para esta sessão do navegador.</p>
+    <div class="cad" id="cad">
+      <div class="step"><div class="d">D1</div><button class="n" aria-label="Concluir etapa D1 - E-mail 1"></button><div class="t"><b>E-mail 1</b><span>Abrir com dor específica do segmento + transparência de origem do contato</span></div></div>
+      <div class="step"><div class="d">D1</div><button class="n" aria-label="Concluir etapa D1 - LinkedIn"></button><div class="t"><b>LinkedIn (conexão + nota)</b><span>Reforço leve, sem anexos</span></div></div>
+      <div class="step"><div class="d">D3</div><button class="n" aria-label="Concluir etapa D3"></button><div class="t"><b>Contato WhatsApp</b><span>Foco em agendamento</span></div></div>
+      <div class="step"><div class="d">D4</div><button class="n" aria-label="Concluir etapa D4"></button><div class="t"><b>E-mail 2</b><span>Prova de valor: caso de uso do segmento</span></div></div>
+      <div class="step"><div class="d">D7</div><button class="n" aria-label="Concluir etapa D7"></button><div class="t"><b>Contato WhatsApp</b><span>Foco em agendamento</span></div></div>
+      <div class="step"><div class="d">D10</div><button class="n" aria-label="Concluir etapa D10"></button><div class="t"><b>E-mail 3 (break-up)</b><span>Encerrar cadência com oferta de diagnóstico gratuito</span></div></div>
+    </div>
+    <button class="reset" id="resetCad">Reiniciar cadência</button>
+    <div class="callout"><b>Regras de conformidade (obrigatórias, LGPD):</b> informar a origem do contato desde o primeiro e-mail; link de opt-out funcional em um clique em toda mensagem; suprimir imediatamente quem pedir descadastro; respeitar a blocklist vigente; escalar ao DPO, no mesmo dia útil, qualquer resposta que cite LGPD ou privacidade.</div>
+  </section>
+
+  <section id="scripts">
+    <h2><span class="k">05</span>Scripts prontos</h2>
+    <p class="sub">Os trechos <span class="ph" style="background:#FDEFC8;border-radius:4px;padding:0 4px;font-family:'IBM Plex Mono';font-size:12.5px;color:#7A5A00">[destacados]</span> devem ser personalizados antes do envio.</p>
+
+    <div class="chat">
+      <div class="who"><b>E-mail 1 — Abertura (exemplo: Indústria)</b><span class="ch">e-mail · D1</span></div>
+      <div class="bubble" id="e1">Assunto: Previsão de demanda por SKU na <span class="ph">[Empresa]</span> — sem planilha
+
+Olá, <span class="ph">[Nome]</span>,
+
+Encontrei seu contato em <span class="ph">[origem dos dados — ex.: base de dados profissional/evento X]</span> e escrevo porque times de PCP e compras de indústrias como a <span class="ph">[Empresa]</span> costumam planejar produção com médias históricas em planilhas — e pagam esse preço em estoque parado, falta de insumo e frete urgente.
+
+O Simon.AI, plataforma de IA da HupData, prevê a demanda por produto, cliente e região combinando seu histórico de vendas com juros, câmbio, clima, calendário e movimentos de mercado — e entrega cenários direto no seu ERP/BI.
+
+Faz sentido uma conversa de 20 minutos para eu mostrar como isso funcionaria com os dados da <span class="ph">[Empresa]</span>?
+
+<span class="ph">[Assinatura]</span> — Se preferir não receber mais mensagens, basta clicar aqui: <span class="ph">[link de descadastro em 1 clique]</span>.</div>
+      <button class="copy" data-copy="e1">Copiar e-mail 1</button>
+    </div>
+
+    <div class="chat">
+      <div class="who"><b>Nota de conexão no LinkedIn</b><span class="ch">LinkedIn · D3</span></div>
+      <div class="bubble" id="lk">Olá, <span class="ph">[Nome]</span>! Trabalho na HupData com previsão de demanda por IA para <span class="ph">[segmento]</span>. Vi seu papel em <span class="ph">[área]</span> na <span class="ph">[Empresa]</span> e acredito que o tema de reduzir ruptura e estoque parado seja pauta aí. Adoraria conectar e trocar uma ideia rápida.</div>
+      <button class="copy" data-copy="lk">Copiar nota</button>
+    </div>
+
+    <div class="chat">
+      <div class="who"><b>Contato WhatsApp — roteiro (foco agendamento)</b><span class="ch">WhatsApp · D3 / D7</span></div>
+      <div class="bubble" id="lg"><b>Abertura:</b> “Oi, <span class="ph">[Nome]</span>! Aqui é <span class="ph">[SDR]</span>, da HupData. Te chamo porque ajudamos <span class="ph">[segmento]</span> a prever demanda com IA — te enviei um e-mail sobre isso, pode ser um mau momento?”
+
+<b>Gancho:</b> “Hoje, como vocês fazem a previsão de vendas para definir <span class="ph">[produção/compras/reposição]</span>? Planilha, ERP, algum modelo?”
+
+<b>Dor:</b> “E com que frequência acontece de faltar produto ou sobrar estoque por erro de previsão?”
+
+<b>Ponte + fechamento:</b> “É exatamente isso que o Simon.AI ataca: ele cruza seu histórico com economia, clima e mercado e prevê por <span class="ph">[SKU/loja/rota]</span>. Consigo te mostrar em 20 minutos com exemplos do seu setor — <span class="ph">[dia/hora]</span> funciona?”</div>
+      <button class="copy" data-copy="lg">Copiar roteiro</button>
+    </div>
+
+    <div class="chat">
+      <div class="who"><b>E-mail 2 — Prova de valor (adaptar por segmento)</b><span class="ch">e-mail · D4</span></div>
+      <div class="bubble" id="e2">Assunto: Como <span class="ph">[segmento]</span> reduz ruptura e estoque com previsão multivariada
+
+<span class="ph">[Nome]</span>, um exemplo prático do que o Simon.AI faz: uma rede de supermercados passa a prever vendas por loja e SKU considerando clima e calendário local, ajustando compras e promoções antes do pico — menos ruptura de gôndola, menos perda de perecíveis e margem protegida em campanha. Para indústria, o mesmo motor dimensiona lotes e contratos de longo prazo; para distribuidoras, prevê volume e mix por rota.
+
+Topa ver um diagnóstico gratuito da maturidade de previsão de demanda da <span class="ph">[Empresa]</span>? Sem compromisso.
+
+<span class="ph">[Assinatura + link de descadastro]</span></div>
+      <button class="copy" data-copy="e2">Copiar e-mail 2</button>
+    </div>
+
+    <div class="chat">
+      <div class="who"><b>E-mail 3 — Break-up</b><span class="ch">e-mail · D10</span></div>
+      <div class="bubble" id="e3">Assunto: Encerro por aqui, <span class="ph">[Nome]</span>?
+
+Não quero insistir num tema fora de hora. Se previsão de demanda entrar na pauta da <span class="ph">[Empresa]</span>, deixo dois caminhos: (1) demonstração de 20 minutos com um especialista; (2) diagnóstico gratuito de maturidade de previsão. É só responder este e-mail. Caso contrário, encerro os contatos por aqui. Obrigado pelo tempo!
+
+<span class="ph">[Assinatura + link de descadastro]</span></div>
+      <button class="copy" data-copy="e3">Copiar e-mail 3</button>
+    </div>
+  </section>
+
+  <section id="discovery">
+    <h2><span class="k">06</span>Perguntas de qualificação (discovery)</h2>
+    <div class="qs">
+      <div class="q">Como a previsão de demanda é feita hoje (planilha, ERP, modelo próprio)? Quem é o dono do número?</div>
+      <div class="q">Qual foi o último episódio relevante de ruptura ou de estoque em excesso? Quanto custou?</div>
+      <div class="q">Quantos SKUs / lojas / rotas ativas? Qual a granularidade de planejamento (mensal, semanal, diária)?</div>
+      <div class="q">Variáveis externas (clima, economia, concorrência) entram hoje no planejamento? Como?</div>
+      <div class="q">Qual ERP/CRM/BI usam? Há área de dados interna?</div>
+      <div class="q">Se a precisão da previsão melhorasse de forma relevante, onde apareceria primeiro o ganho: estoque, margem ou nível de serviço?</div>
+    </div>
+  </section>
+
+  <section id="objecoes">
+    <h2><span class="k">07</span>Objeções frequentes e respostas</h2>
+    <details open><summary>“Já temos previsão no ERP/planilha.”</summary><div class="body">Ótimo — o Simon.AI não substitui o ERP, ele o alimenta. A diferença é o modelo multivariado: além do histórico, entram juros, câmbio, clima, calendário e concorrência. É o que explica os desvios que a média histórica não captura.</div></details>
+    <details><summary>“Nossos dados são bagunçados.”</summary><div class="body">É o cenário mais comum. A HupData faz a preparação e integração dos dados (ERP, CRM, BI) como parte do projeto — você não precisa de um data lake pronto para começar.</div></details>
+    <details><summary>“IA é caixa-preta.”</summary><div class="body">O Simon.AI mostra os drivers da previsão — quanto do resultado vem de preço, clima, sazonalidade ou economia. Você entende o porquê, não só o quanto.</div></details>
+    <details><summary>“Não tenho time técnico.”</summary><div class="body">A interface é em linguagem natural: o usuário de negócio pergunta como falaria com um analista e recebe a resposta pronta. Há inclusive app móvel.</div></details>
+    <details><summary>“Quanto custa?”</summary><div class="body">Há três formatos: teste gratuito de um mês (1 usuário), plano Business de 3 meses (até 3 usuários, conexão direta aos dados e painel de previsões) e Business Plus de 12 meses (até 6 usuários, modelos mais poderosos e maior velocidade de respostas). O ideal é dimensionar na demo.</div></details>
+  </section>
+
+  <section id="cta">
+    <h2><span class="k">08</span>CTA padrão</h2>
+    <div class="cta2">
+      <div class="c"><b>Principal</b>Agendar demonstração de 20–30 minutos com especialista.</div>
+      <div class="c"><b>Alternativo (ímã de lead)</b>Diagnóstico gratuito de maturidade de previsão de demanda.</div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+// copiar scripts (texto puro, sem marcação de placeholder)
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const el=document.getElementById(btn.dataset.copy);
+    const txt=el.innerText;
+    navigator.clipboard.writeText(txt).then(()=>{
+      const old=btn.textContent;btn.textContent='Copiado ✓';btn.classList.add('done');
+      setTimeout(()=>{btn.textContent=old;btn.classList.remove('done')},1800);
+    });
+  });
+});
+// filtro ICP
+document.querySelectorAll('.pill').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));
+    p.classList.add('on');
+    const seg=p.dataset.seg;
+    document.querySelectorAll('tr[data-seg]').forEach(tr=>{
+      tr.classList.toggle('hide',seg!=='all'&&tr.dataset.seg!==seg);
+    });
+  });
+});
+// cadência (estado em memória da sessão)
+document.querySelectorAll('#cad .n').forEach(n=>{
+  n.addEventListener('click',()=>{n.classList.toggle('ck');n.closest('.step').classList.toggle('ck');});
+});
+document.getElementById('resetCad').addEventListener('click',()=>{
+  document.querySelectorAll('#cad .n').forEach(n=>{n.classList.remove('ck');n.closest('.step').classList.remove('ck');});
+});
+// nav ativa por scroll
+const links=[...document.querySelectorAll('aside a[href^="#"]')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){
+    links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id));
+  }});
+},{rootMargin:'-30% 0px -60% 0px'});
+secs.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
